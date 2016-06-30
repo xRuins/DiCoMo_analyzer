@@ -32,7 +32,8 @@ class ScheduleScraper < Scraper
             title = Sanitize.clean(table.children[1].children[1].to_s.toutf8)
             speaker_text = Sanitize.clean(table.children[3].children[1].children.to_s.toutf8)
             speaker_list = AuthorsNameParser.parse(speaker_text)
-            presentation_info = {title: title, speaker: speaker_list, session_id: @session_id, date: date, chairman: chairman}
+            chairman_name = AuthorsNameParser.parse(chairman)
+            presentation_info = {title: title, speaker: speaker_list, session_id: @session_id, date: date, chairman: chairman_name}
             presentations << presentation_info
         end
 
