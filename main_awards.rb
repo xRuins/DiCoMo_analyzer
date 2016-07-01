@@ -3,8 +3,7 @@ require 'byebug'
 require './award_scraper.rb'
 require './scraper.rb'
 
-target_year = (2010..2015)
-
+target_year = (2007..2015)
 
 best_paper_awards = []
 paper_awards = []
@@ -12,7 +11,9 @@ paper_awards = []
 for year in target_year do
     p "proceeding #{year}..."
     if year >= 2014
-        url = "http://www.dicomo.org/#{year}/#{year}/commendation/index.html"
+        url = "http://www.dicomo.org/2014/2014/commendation/index.html"
+    elsif year == 2008
+        url = "http://www.dicomo.org/2008/award.html"
     else
         url = "http://dicomo.org/#{year}/commendation.html"
     end
@@ -20,7 +21,7 @@ for year in target_year do
     begin
         scraper = AwardsScraper.new(url, year)
     rescue InvalidPageException
-        break
+        next
     end
     best_paper_awards << {year: year, contents: scraper.get_best_presentation_awards}
     paper_awards << {year: year, contents: scraper.get_presentation_awards}

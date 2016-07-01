@@ -4,7 +4,7 @@ require 'csv'
 require './schedule_scraper.rb'
 require './scraper.rb'
 
-target_year = (2010..2015)
+target_year = (2007..2015)
 
 
 scraped_info = []

@@ -22,6 +22,16 @@ class AwardsScraper < Scraper
             content.each do |td_text|
                 nominated_titles << td_text if title_filter(td_text)
             end
+        elsif @year <= 2008
+            content = @doc.xpath('//*[@class="all"]/*[@class="main"]').text.toutf8.split("\n")
+            content.each do |td_text|
+                line_type = match_awards_line(td_text)
+                best_presentation_awards_begun = true if line_type == :best_presentation_awards
+                break if line_type == :presentation_awards
+                next unless best_presentation_awards_begun # ignore lines until the line of best presentation awards appears
+                result = (td_text =~ /^[0-9A-Z-]+　(.*)$/)
+                nominated_titles << $1 if result
+            end
         else
             get_content_text.each  do |line|
                 line_type = match_awards_line(line)
@@ -84,9 +94,10 @@ class AwardsScraper < Scraper
     end
 
     def match_awards_line string
-        return :best_presentation_awards if string =~ /^.*Best Presentation Awards.*$/
-        return :presentation_awards if string =~ /^.*Presentation Awards.*$/
-        return :young_researcher_awards if string =~ /^.*Young Researcher Awards.*$/
+        byebug if string.include?("最優秀プレゼンテーション賞")
+        return :best_presentation_awards if string =~ /^.*Best Presentation Awards.*$/ or string =~ /^.*最優秀プレゼンテーション.*$/
+        return :presentation_awards if string =~ /^.*Presentation Awards.*$/ or string =~ /^.*優秀プレゼンテーション.*$/
+        return :young_researcher_awards if string =~ /^.*Young Researcher Awards.*$/ or string =~ /^.*ヤングリサーチャー.*$/
         return nil
     end
 end
