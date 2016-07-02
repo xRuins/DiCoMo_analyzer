@@ -12,8 +12,8 @@ for year in target_year do
     p "proceeding #{year}..."
     if year >= 2014
         url = "http://www.dicomo.org/2014/2014/commendation/index.html"
-    elsif year == 2008
-        url = "http://www.dicomo.org/2008/award.html"
+    elsif year <= 2008
+        url = "http://www.dicomo.org/#{year}/award.html"
     else
         url = "http://dicomo.org/#{year}/commendation.html"
     end
