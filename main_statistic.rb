@@ -36,15 +36,14 @@ def search_title_from_awards title, awards
     awards.each do |year|
         begin
             year['contents'].each do |award|
-                simplified_award = Moji.zen_to_han(simplify_string(award).toutf8)
-                simplified_title = Moji.zen_to_han(simplify_string(title).toutf8)
+                simplified_award = award.toutf8
+                simplified_title = title.toutf8
                 if simplified_award == simplified_title
                     return true
                 end
             end
         rescue Exception => e
             puts %Q(class=[#{e.class}] message=[#{e.message}])
-            #byebug
         end
     end
     return false
@@ -68,9 +67,6 @@ presentations = read_json_file('presentations.json')
 best_presentation_awards = read_json_file('best_paper_awards.json')
 presentations_awards = read_json_file('paper_awards.json')
 young_researcher_awards = read_json_file('young_researcher_awards.json')
-best_presentation_awards_c = best_presentation_awards.dup
-presentations_awards_c = presentations_awards.dup
-young_researcher_awards_c = young_researcher_awards.dup
 presentations_with_award  = []
 chairmans = []
 presentations.each do |sessions|
@@ -86,6 +82,7 @@ presentations.each do |sessions|
         chairman = chairmans.find { |c| c[:name] == chairman_name }
         # count up awards if chairman exists
         if chairman
+            chairman[:number] += 1
             if best_presentation_nominee
                 chairman[:best_presentation_award] += 1
                 best_presentation_award_counted += 1
@@ -98,16 +95,16 @@ presentations.each do |sessions|
             end
         else
             if best_presentation_nominee
-                chairmans << {name: chairman_name, best_presentation_award: 1, presentation_award: 0, young_researcher_award: 0}
+                chairmans << {name: chairman_name, best_presentation_award: 1, presentation_award: 0, young_researcher_award: 0, number: 1}
                 best_presentation_award_counted += 1
             elsif presentation_nominee
-                chairmans << {name: chairman_name, best_presentation_award: 0, presentation_award: 1, young_researcher_award: 0}
+                chairmans << {name: chairman_name, best_presentation_award: 0, presentation_award: 1, young_researcher_award: 0, number: 1}
                 presentation_award_counted += 1
             elsif young_researcher_nominee
-                chairmans << {name: chairman_name, best_presentation_award: 0, presentation_award: 0, young_researcher_award: 1}
+                chairmans << {name: chairman_name, best_presentation_award: 0, presentation_award: 0, young_researcher_award: 1, number: 1}
                 young_researcher_awards_counted += 1
             else
-                chairmans << {name: chairman_name, best_presentation_award: 0, presentation_award: 0, young_researcher_award: 0}
+                chairmans << {name: chairman_name, best_presentation_award: 0, presentation_award: 0, young_researcher_award: 0, number: 1}
             end
         end
     end
@@ -116,12 +113,31 @@ end
 File.open("presentations_with_award.json", "w") do |file|
     file.puts presentations_with_award.to_json.to_s
 end
+File.open("presentations_with_award.csv", "w") do |file|
+    presentations_with_award.each do |year|
+        line = year['title'] + ","
+        line += year['speaker'].join('_').gsub(/_ /, '_') + ","
+        line += year['session_id'] + ","
+        line += year['date'] + ","
+        line += year['chairman'].join(' ') + ","
+        line += year[:best_presentation_award].to_s + ","
+        line += year[:presentation_award].to_s + ","
+        line += year[:young_researcher_award].to_s
+        file.puts line
+    end
+end
 File.open("statistic_chairman.json", "w") do |file|
     file.puts chairmans.to_json.to_s
 end
 File.open("statistic_chairman.csv", "w") do |file|
     chairmans.each do |chairman|
-        file.puts chairman.values.to_csv
+        cv = chairman.values
+        name = cv[0][0]
+        bp = cv[1]
+        pa = cv[2]
+        yr = cv[3]
+        num = cv[4]
+        file.puts "#{name}, #{bp}, #{pa}, #{yr}, #{num}"
     end
 end
 
