@@ -12,7 +12,7 @@ young_researcher_awards = []
 for year in target_year do
     p "proceeding #{year}..."
     if year >= 2014
-        url = "http://www.dicomo.org/2014/2014/commendation/index.html"
+        url = "http://www.dicomo.org/#{year}/#{year}/commendation/index.html"
     elsif year <= 2008
         url = "http://www.dicomo.org/#{year}/award.html"
     else
